@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/kelas.css">
+    <title>Panel Admin - El-pro</title>
+    <style>
+      .admin-page { padding: 30px 16px; font-family: "Space Grotesk", sans-serif; margin-left: 0; max-width: none; }
+      .admin-page h3 { font-weight: 800; margin-bottom: 8px; color: #111; font-size: 2rem; }
+      .admin-page .subtitle { color: #555; font-size: 1rem; font-weight: 600; margin-bottom: 28px; }
+      .admin-denied { text-align: center; padding: 60px 20px; }
+      .admin-denied h4 { font-weight: 800; margin-bottom: 10px; font-size: 1.8rem; color: #111; }
+
+      .tabs { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+      .tab-btn { padding: 10px 24px; border: 3px solid #111; background: #fff; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; font-family: inherit; box-shadow: 4px 4px 0 #111; color: #111; text-transform: uppercase; }
+      .tab-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #111; }
+      .tab-btn.active { background: #3b82f6; color: #fff; box-shadow: 2px 2px 0 #111; transform: translate(2px, 2px); }
+
+      .admin-card { background: #fff; border: 3px solid #111; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 4px 4px 0 #111; transition: transform 0.2s; }
+      .admin-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #111; }
+      .admin-card h5 { font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; color: #111; }
+      .admin-card .meta { font-size: 0.85rem; color: #555; font-weight: 700; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px dashed #111; }
+      .admin-card .hint-list { font-size: 0.9rem; margin: 12px 0; padding-left: 20px; }
+      .admin-card .hint-list li { margin-bottom: 6px; color: #222; font-weight: 500; }
+      .admin-card .actions { display: flex; gap: 12px; margin-top: 16px; }
+
+      .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; border: 3px solid #111; cursor: pointer; font-family: inherit; transition: all 0.2s; box-shadow: 3px 3px 0 #111; text-transform: uppercase; }
+      .btn-sm:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #111; }
+      .btn-sm:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #111; }
+      .btn-edit { background: #facc15; color: #111; }
+      .btn-del { background: #f87171; color: #111; }
+      .btn-add { background: #3b82f6; color: #fff; padding: 12px 28px; font-size: 0.95rem; margin-bottom: 24px; box-shadow: 4px 4px 0 #111; }
+
+      .form-group { margin-bottom: 16px; }
+      .form-group label { display: block; font-weight: 800; font-size: 0.85rem; margin-bottom: 6px; text-transform: uppercase; color: #111; }
+      .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 3px solid #111; border-radius: 8px; font-family: inherit; font-size: 0.95rem; background: #fff; box-shadow: inset 2px 2px 0 rgba(0,0,0,0.05); }
+      .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+      .form-group textarea { min-height: 80px; resize: vertical; }
+
+      .modal-bg { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.8); z-index: 9999; place-items: center; backdrop-filter: blur(4px); }
+      .modal-bg.show { display: grid; }
+      .modal-content { background: #fff; border-radius: 12px; padding: 28px; width: min(550px, 92vw); max-height: 85vh; overflow-y: auto; border: 4px solid #111; box-shadow: 8px 8px 0 #111; }
+      .modal-content h4 { font-weight: 900; margin-bottom: 20px; font-size: 1.5rem; text-transform: uppercase; border-bottom: 3px solid #111; padding-bottom: 10px; }
+
+      /* Sidebar fixes for guru pages */
+      .sidebar {
+        height: 100vh;
+        width: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #ffffff;
+        border-right: 3px solid #111;
+        z-index: 1000;
+        box-shadow: none;
+      }
+
+      .sidebar-icons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 30px;
+      }
+
+      .sidebar-icons ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar-icons li {
+        margin-bottom: 25px;
+      }
+
+      .sidebar-icons a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: transparent;
+      }
+
+      .sidebar-icons a:hover {
+        background-color: #ffea00;
+        border-color: #111;
+        box-shadow: 4px 4px 0 #111;
+        transform: translate(-3px, -3px);
+      }
+
+      .sidebar-icons a.active {
+        background-color: #3d5afe;
+        border-color: #111;
+        box-shadow: 4px 4px 0 #111;
+        transform: translate(-2px, -2px);
+      }
+
+      .sidebar-icons img {
+        width: 26px;
+        height: 26px;
+        filter: none;
+        transition: all 0.2s;
+      }
+
+      .sidebar-icons a.active img {
+        filter: brightness(0) invert(1);
+      }
+
+      /* Container adjustment for guru pages */
+      .container.admin-page {
+        margin-left: 100px;
+        padding: 40px;
+        max-width: calc(100vw - 100px);
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 60px;
+        }
+        .container.admin-page {
+          margin-left: 60px;
+          max-width: calc(100vw - 60px);
+          padding: 20px;
+        }
+        .sidebar-icons img {
+          width: 20px;
+          height: 20px;
+        }
+        .sidebar-icons a {
+          width: 40px;
+          height: 40px;
+        }
+      }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-icons">
+      <ul>
+        <li><a href="index.html"><img src="/assets/image/web icons/home2.svg" class="home-icon"></a></li>
+        <li><a href="/guru/kelas.html"><img src="/assets/image/web icons/homeProfile.svg" class="homeProfile-icon"></a></li>
+        <li><a href="/guru/manajemen-tantangan.html" class="active"><img src="/assets/image/web icons/course.svg" class="course-icon"></a></li>
+        <li><a href="/guru/absensi.html"><img src="/assets/image/web icons/book.svg" class="absen-icon"></a></li>
+        <li><a href="/guru/profile.html"><img src="/assets/image/web icons/profile.svg" class="user-profile"></a></li>
+      </ul>
+    </div>
+</div>
+
+<div class="container admin-page" id="adminContent" style="display:none">
+    <h3>Manajemen Tantangan & Quiz</h3>
+    <p class="subtitle">Kelola daftar tantangan, hint interaktif, dan soal kuis</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('challenges')">Tantangan</button>
+      <button class="tab-btn" onclick="switchTab('quiz')">Soal Kuis</button>
+      <button class="tab-btn" onclick="switchTab('users')" id="tabUsersBtn" style="display:none">Manajemen User</button>
+    </div>
+
+    <!-- Tab: Tantangan -->
+    <div id="tab-challenges">
+      <button class="btn-sm btn-add" onclick="openModal('add')">+ Tambah Tantangan</button>
+      <div id="challengesList"></div>
+    </div>
+
+    <!-- Tab: Kuis -->
+    <div id="tab-quiz" style="display:none">
+      <button class="btn-sm btn-add" onclick="openQuizModal('add')">+ Tambah Soal</button>
+      <div id="quizList"></div>
+    </div>
+
+    <!-- Tab: Manajemen User -->
+    <div id="tab-users" style="display:none">
+      <div id="usersList"></div>
+    </div>
+</div>
+
+<!-- Access denied -->
+<div class="container admin-page admin-denied" id="adminDenied" style="display:none">
+    <h4>Akses Ditolak</h4>
+    <p>Halaman ini hanya bisa diakses oleh Administrator.</p>
+    <a href="/index.html" class="btn btn-primary">Kembali ke Beranda</a>
+</div>
+
+<!-- Modal Tantangan -->
+<div class="modal-bg" id="challengeModal">
+  <div class="modal-content">
+    <h4 id="modalTitle">Tambah Tantangan</h4>
+    <input type="hidden" id="editId">
+    <div class="form-group"><label>Judul</label><input id="fTitle" placeholder="Judul tantangan"></div>
+    <div class="form-group"><label>Konsep</label>
+      <select id="fKonsep"><option>Sequence (Urutan)</option><option>Conditional (IF-ELSE)</option><option>Loop + Conditional</option><option>Variabel + Print</option><option>While Loop</option><option>Function</option><option>Array + Loop</option><option>Nested Conditional</option></select>
+    </div>
+    <div class="form-group"><label>Kesulitan</label>
+      <select id="fDiff"><option>Mudah</option><option>Sedang</option><option>Sulit</option></select>
+    </div>
+    <div class="form-group"><label>Poin Maksimal</label><input id="fPoin" type="number" value="10"></div>
+    <div class="form-group"><label>Cerita</label><textarea id="fStory" placeholder="Cerita konteks tantangan..."></textarea></div>
+    <div class="form-group"><label>Blok (satu per baris, urutan benar)</label><textarea id="fBlocks" rows="6" placeholder="Rebus air&#10;Masukkan mie&#10;Siapkan bumbu"></textarea></div>
+    <div class="form-group"><label>Hint 1</label><input id="fH1" placeholder="Petunjuk umum..."></div>
+    <div class="form-group"><label>Hint 2</label><input id="fH2" placeholder="Petunjuk lebih spesifik..."></div>
+    <div class="form-group"><label>Hint 3</label><input id="fH3" placeholder="Hampir jawaban..."></div>
+    <div class="form-group"><label>Penjelasan Jawaban (Muncul setelah berhasil)</label><textarea id="fExp" placeholder="Jelaskan kenapa urutan tersebut benar..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-sm btn-del" onclick="closeModal()" style="flex:1">Batal</button>
+      <button class="btn-sm btn-add" onclick="saveChallenge()" style="flex:1" id="btnSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Kuis -->
+<div class="modal-bg" id="quizModal">
+  <div class="modal-content">
+    <h4 id="quizModalTitle">Tambah Soal Kuis</h4>
+    <input type="hidden" id="editQIdx">
+    <div class="form-group"><label>Pertanyaan</label><textarea id="fQ" placeholder="Isi pertanyaan..."></textarea></div>
+    <div class="form-group"><label>Opsi A</label><input id="fA" placeholder="Pilihan A"></div>
+    <div class="form-group"><label>Opsi B</label><input id="fB" placeholder="Pilihan B"></div>
+    <div class="form-group"><label>Opsi C</label><input id="fC" placeholder="Pilihan C"></div>
+    <div class="form-group"><label>Opsi D</label><input id="fD" placeholder="Pilihan D"></div>
+    <div class="form-group"><label>Jawaban Benar</label>
+      <select id="fAns"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-sm btn-del" onclick="closeQuizModal()" style="flex:1">Batal</button>
+      <button class="btn-sm btn-add" onclick="saveQuiz()" style="flex:1">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+// ═══ AUTH CHECK — Admin & Guru ═══
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await checkAuth();
+  if (!user) return;
+  
+  const savedUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+  if (savedUser.role === 'admin' || savedUser.role === 'guru') {
+    document.getElementById('adminContent').style.display = 'block';
+    
+    // Switch title
+    document.querySelector('.admin-page h3').textContent = savedUser.role === 'admin' ? 'Panel Admin' : 'Manajemen Tantangan & Quiz';
+    
+    // Load common features
+    loadChallenges();
+    loadQuizList();
+    
+    if (savedUser.role === 'admin') {
+      document.getElementById('tabUsersBtn').style.display = 'inline-block';
+      loadUsers();
+    }
+  } else {
+    document.getElementById('adminDenied').style.display = 'block';
+  }
+});
+
+// ═══ LOAD DATA ═══
+function getChallengeData() {
+  try {
+    const s = localStorage.getItem('codekids_challenges');
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
+}
+
+function getQuizData() {
+  try {
+    const s = localStorage.getItem('codekids_quiz');
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
+}
+
+// Default challenge data (loaded from quiz.js via localStorage)
+let challengeData = getChallengeData();
+let quizData = getQuizData();
+
+// If no local data, we need to load from the page with quiz.js, so we show a note
+function loadChallenges() {
+  const list = document.getElementById('challengesList');
+  if (!challengeData) {
+    list.innerHTML = '<div class="admin-card"><p>Data tantangan belum tersimpan di localStorage. Silakan buka halaman <a href="/guru/quiz.html">Daftar Tantangan</a> sekali dulu, lalu kembali ke sini.</p></div>';
+    return;
+  }
+  
+  list.innerHTML = Object.keys(challengeData).map(id => {
+    const c = challengeData[id];
+    const hints = c.hints || [];
+    return `
+      <div class="admin-card">
+        <h5>${c.title}</h5>
+        <div class="meta">${c.konsep || ''} • ${c.meta ? c.meta[0] : ''} • ${c.blocks ? c.blocks.length : 0} blok</div>
+        <p style="font-size:0.88rem;color:#444;margin-bottom:4px">${c.story || ''}</p>
+        <ul class="hint-list">
+          ${hints.map((h, i) => `<li><strong>Hint ${i+1}:</strong> ${h.replace(/<[^>]+>/g, '')}</li>`).join('')}
+        </ul>
+        <div class="actions">
+          <button class="btn-sm btn-edit" onclick="editChallenge(${id})">Edit</button>
+          <button class="btn-sm btn-del" onclick="deleteChallenge(${id})">Hapus</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadQuizList() {
+  const list = document.getElementById('quizList');
+  if (!quizData) {
+    list.innerHTML = '<div class="admin-card"><p>Data kuis belum tersimpan. Buka halaman <a href="/guru/quiz.html">Tantangan</a> dan klik Kuis Mini sekali dulu.</p></div>';
+    return;
+  }
+  
+  list.innerHTML = quizData.map((q, idx) => `
+    <div class="admin-card">
+      <h5>Soal ${idx + 1}</h5>
+      <p style="font-size:0.9rem;margin-bottom:8px">${q.q}</p>
+      <div style="font-size:0.82rem;color:#666">
+        ${q.opts.map((o, i) => `<div>${['A','B','C','D'][i]}. ${o} ${i === q.ans ? '<strong style="color:#059669">✓ Benar</strong>' : ''}</div>`).join('')}
+      </div>
+      <div class="actions">
+        <button class="btn-sm btn-edit" onclick="editQuiz(${idx})">Edit</button>
+        <button class="btn-sm btn-del" onclick="deleteQuiz(${idx})">Hapus</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══ TABS ═══
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-challenges').style.display = tab === 'challenges' ? 'block' : 'none';
+  document.getElementById('tab-quiz').style.display = tab === 'quiz' ? 'block' : 'none';
+  document.getElementById('tab-users').style.display = tab === 'users' ? 'block' : 'none';
+}
+
+// ═══ CHALLENGE CRUD ═══
+function openModal(mode) {
+  document.getElementById('challengeModal').classList.add('show');
+  document.getElementById('modalTitle').textContent = mode === 'add' ? 'Tambah Tantangan' : 'Edit Tantangan';
+  if (mode === 'add') {
+    document.getElementById('editId').value = '';
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fStory').value = '';
+    document.getElementById('fBlocks').value = '';
+    document.getElementById('fH1').value = '';
+    document.getElementById('fH2').value = '';
+    document.getElementById('fH3').value = '';
+    document.getElementById('fExp').value = '';
+    document.getElementById('fPoin').value = '10';
+  }
+}
+function closeModal() { document.getElementById('challengeModal').classList.remove('show'); }
+
+function editChallenge(id) {
+  const c = challengeData[id];
+  if (!c) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('fTitle').value = c.title.replace(/Tantangan \d+ — /, '');
+  document.getElementById('fKonsep').value = c.konsep || '';
+  document.getElementById('fDiff').value = c.meta ? c.meta[0] : 'Mudah';
+  document.getElementById('fPoin').value = c.meta ? (c.meta[2]?.match(/\d+/)?.[0] || '10') : '10';
+  document.getElementById('fStory').value = (c.story || '').replace(/<[^>]+>/g, '');
+  document.getElementById('fBlocks').value = c.blocks ? c.blocks.map(b => b.text).join('\n') : '';
+  document.getElementById('fH1').value = c.hints ? (c.hints[0] || '').replace(/<[^>]+>/g, '') : '';
+  document.getElementById('fH2').value = c.hints ? (c.hints[1] || '').replace(/<[^>]+>/g, '') : '';
+  document.getElementById('fH2').value = c.hints ? (c.hints[1] || '').replace(/<[^>]+>/g, '') : '';
+  document.getElementById('fH3').value = c.hints ? (c.hints[2] || '').replace(/<[^>]+>/g, '') : '';
+  
+  // Ambil penjelasan dari DB jika ada
+  fetch('/api/challenges/' + id)
+    .then(r => r.json())
+    .then(data => {
+        if (data.explanation) document.getElementById('fExp').value = data.explanation;
+    })
+    .catch(e => console.log("Belum ada penjelasan di DB"));
+
+  openModal('edit');
+}
+
+function saveChallenge() {
+  const editId = document.getElementById('editId').value;
+  const colors = ['blk-blue', 'blk-green', 'blk-pink', 'blk-yellow', 'blk-gray'];
+  const blocksRaw = document.getElementById('fBlocks').value.trim().split('\n').filter(b => b.trim());
+  const blocks = blocksRaw.map((text, i) => ({ id: String.fromCharCode(97 + i), text: text.trim(), color: colors[i % colors.length] }));
+  const order = blocks.map(b => b.id);
+  const poin = parseInt(document.getElementById('fPoin').value) || 10;
+  const diff = document.getElementById('fDiff').value;
+
+  const id = editId || (Math.max(...Object.keys(challengeData).map(Number)) + 1);
+  const num = editId || id;
+
+  const hintsArr = [document.getElementById('fH1').value, document.getElementById('fH2').value, document.getElementById('fH3').value];
+  const explanation = document.getElementById('fExp').value;
+
+  challengeData[id] = {
+    title: 'Tantangan ' + num + ' — ' + document.getElementById('fTitle').value,
+    sub: 'Seret blok kode ke urutan yang benar',
+    meta: [diff, 'Hint tersedia', '⭐ Maks ' + poin + ' poin'],
+    konsep: document.getElementById('fKonsep').value,
+    blockCount: blocks.length,
+    story: document.getElementById('fStory').value,
+    hints: hintsArr,
+    blocks, order
+  };
+
+  localStorage.setItem('codekids_challenges', JSON.stringify(challengeData));
+  
+  // SIMPAN KE DATABASE BACKEND
+  const token = localStorage.getItem('auth_token');
+  fetch('/api/challenges/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        token: token,
+        id: String(id),
+        title: challengeData[id].title,
+        hints: JSON.stringify(hintsArr),
+        explanation: explanation
+    })
+  }).then(r => r.json()).then(res => {
+      if(res.success) console.log("Tersimpan di DB");
+      else alert("Gagal simpan ke DB: " + res.message);
+  });
+
+  closeModal();
+  loadChallenges();
+}
+
+function deleteChallenge(id) {
+  if (!confirm('Hapus tantangan #' + id + '?')) return;
+  delete challengeData[id];
+  localStorage.setItem('codekids_challenges', JSON.stringify(challengeData));
+  
+  // HAPUS DARI DATABASE BACKEND
+  const token = localStorage.getItem('auth_token');
+  fetch('/api/challenges/delete/' + id, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token })
+  });
+
+  loadChallenges();
+}
+
+// ═══ QUIZ CRUD ═══
+function openQuizModal(mode) {
+  document.getElementById('quizModal').classList.add('show');
+  document.getElementById('quizModalTitle').textContent = mode === 'add' ? 'Tambah Soal' : 'Edit Soal';
+  if (mode === 'add') {
+    document.getElementById('editQIdx').value = '';
+    document.getElementById('fQ').value = '';
+    document.getElementById('fA').value = '';
+    document.getElementById('fB').value = '';
+    document.getElementById('fC').value = '';
+    document.getElementById('fD').value = '';
+    document.getElementById('fAns').value = '0';
+  }
+}
+function closeQuizModal() { document.getElementById('quizModal').classList.remove('show'); }
+
+function editQuiz(idx) {
+  const q = quizData[idx];
+  document.getElementById('editQIdx').value = idx;
+  document.getElementById('fQ').value = q.q;
+  document.getElementById('fA').value = q.opts[0];
+  document.getElementById('fB').value = q.opts[1];
+  document.getElementById('fC').value = q.opts[2] || '';
+  document.getElementById('fD').value = q.opts[3] || '';
+  document.getElementById('fAns').value = q.ans;
+  openQuizModal('edit');
+}
+
+function saveQuiz() {
+  const idx = document.getElementById('editQIdx').value;
+  const item = {
+    q: document.getElementById('fQ').value,
+    opts: [document.getElementById('fA').value, document.getElementById('fB').value, document.getElementById('fC').value, document.getElementById('fD').value],
+    ans: parseInt(document.getElementById('fAns').value)
+  };
+
+  if (!quizData) quizData = [];
+  if (idx !== '') {
+    quizData[parseInt(idx)] = item;
+  } else {
+    quizData.push(item);
+  }
+
+  localStorage.setItem('codekids_quiz', JSON.stringify(quizData));
+  closeQuizModal();
+  loadQuizList();
+}
+
+function deleteQuiz(idx) {
+  if (!confirm('Hapus soal #' + (idx + 1) + '?')) return;
+  quizData.splice(idx, 1);
+  localStorage.setItem('codekids_quiz', JSON.stringify(quizData));
+  loadQuizList();
+}
+
+// ═══ MANAJEMEN USER ═══
+async function loadUsers() {
+  const token = localStorage.getItem('auth_token');
+  try {
+    const res = await fetch(API_BASE + '/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const list = document.getElementById('usersList');
+      list.innerHTML = data.users.map(u => `
+        <div class="admin-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h5 style="margin-bottom:0">${u.fullname}</h5>
+            <div class="meta" style="border:none; margin:0; padding:0">${u.email}</div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <select class="form-group" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onchange="updateUserRole(${u.id}, this.value)">
+              <option value="user" ${u.role === 'user' ? 'selected' : ''}>Siswa</option>
+              <option value="guru" ${u.role === 'guru' ? 'selected' : ''}>Guru / Dosen</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+            <button class="btn-sm btn-del" style="margin:0; box-shadow:2px 2px 0 #111;" onclick="deleteUserRow(${u.id})">Hapus</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {}
+}
+
+async function updateUserRole(userId, newRole) {
+  const token = localStorage.getItem('auth_token');
+  try {
+    const res = await fetch(API_BASE + '/api/users/update_role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, user_id: userId, role: newRole })
+    });
+    const data = await res.json();
+    alert(data.message);
+    if (!data.success) loadUsers(); // reload to revert change if failed
+  } catch(e) {
+    alert("Gagal menghubungi server");
+  }
+}
+
+async function deleteUserRow(userId) {
+  if (!confirm('Hapus akun ini secara permanen?')) return;
+  const token = localStorage.getItem('auth_token');
+  try {
+    const res = await fetch(API_BASE + '/api/users/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, user_id: userId })
+    });
+    const data = await res.json();
+    alert(data.message);
+    if (data.success) loadUsers();
+  } catch(e) {
+    alert("Gagal menghapus user");
+  }
+}
+</script>
+</body>
+</html>
